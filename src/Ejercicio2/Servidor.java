@@ -1,4 +1,4 @@
-package Tema
+package Ejercicio2;
 
 import java.io.*;
 import java.net.*;
