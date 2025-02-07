@@ -1,4 +1,4 @@
-package practicas.Ejer4;
+package Examensuelo;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,10 +9,15 @@ import java.net.MulticastSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Cliente2 {
+public class Cliente {
     public static void main(String[] args) throws IOException {
-        InetAddress group = InetAddress.getByName("230.0.0.0");
+        InetAddress group = InetAddress.getByName("224.0.0.1");
         int port = 4446;
+
+        // Solicitar el nombre del usuario
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Introduce tu nombre de usuario: ");
+        String nombreUsuario = scanner.nextLine();
 
         // Thread to receive multicast messages
         new Thread(() -> {
@@ -32,11 +37,10 @@ public class Cliente2 {
 
         // Sending messages to the server
         try (Socket socket = new Socket("localhost", 9744);
-             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-             Scanner scanner = new Scanner(System.in)) {
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
             while (true) {
                 String mensaje = scanner.nextLine();
-                bw.write(mensaje + "\n");
+                bw.write(nombreUsuario + ": " + mensaje + "\n");
                 bw.flush();
             }
         } catch (IOException e) {
