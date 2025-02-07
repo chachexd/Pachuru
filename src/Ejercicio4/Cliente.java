@@ -47,6 +47,7 @@ public class Cliente {
                 }
             }
 
+
             // Cerrar el socket
             socket.close();
             System.out.println("Conexión cerrada.");
