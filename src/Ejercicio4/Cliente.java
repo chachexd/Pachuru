@@ -4,8 +4,8 @@ import java.io.*;
 import java.net.*;
 
 public class Cliente {
-    private static final String direccion = "230.0.0.0";
-    private static final int puerto = 4446;
+    private static final String direccion = "231.0.0.1";
+    private static final int puerto = 12345;
 
     public static void main(String[] args) {
         try {
