@@ -1,46 +1,58 @@
-package Multicast2;
+package Ejercicio4;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
-import java.util.Random;
-import java.util.Scanner;
 
 public class Emisor {
-    public static void main(String[] args) throws Exception {
-        System.out.println("Introduce tu nombre de usuario: ");
-        Scanner sc = new Scanner(System.in);
-        String nombreUsuario = sc.nextLine();
+    private static final String direccion = "231.0.0.1";
+    private static final int puerto = 12345;
 
-        String message;
-        int n = 1;
-        InetAddress address = null;
-        MulticastSocket socket = null;
-        DatagramPacket packet = null;
-        Random r = new Random();
-        long t;
+    public static void main(String[] args) {
         try {
-            address = InetAddress.getByName("224.0.0.1");
-        }
-        catch (UnknownHostException e) {
-            System.out.println("Error: " + e.toString());
-        }
-        try {
-            socket = new MulticastSocket();
-// socket.setTimeToLive(255);
-        }
-        catch (IOException e) {
-            System.out.println("Error: " + e.toString());
-        }
-        while (true) {
-            message = nombreUsuario + " envía el mensaje:  #" +
-                    Integer.toString(n++);
-            byte[] data = new byte[1024];
-            data = message.getBytes();
-            packet = new DatagramPacket(data, data.length, address, 4000);
-            socket.send(packet);
-            System.out.println("Enviado: " + message);
-            t = (r.nextInt(10) + 1) * 100; // valor aleatorio de espera
-            Thread.sleep(t);
+            // Crear un socket para enviar los mensajes
+            MulticastSocket socket = new MulticastSocket();
+
+            // Dirección multicast
+            InetAddress grupo = InetAddress.getByName(direccion);
+
+            // Pedir el nombre de usuario
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Introduce tu nombre de usuario: ");
+            String usuario = reader.readLine();
+
+            // Bucle para enviar mensajes
+            int contador = 1;
+            String salida = "";  //Inicializamos la variable
+            while (!salida.equals("salir")) {
+                //Leer el mensaje del usuario
+                System.out.print("Escribe un mensaje (o 'salir' para terminar): ");
+                salida = reader.readLine();  //Actualizamos la variable con la entrada del usuario
+
+                if (!salida.equals("salir")) {
+                    //Crear el mensaje a enviar
+                    String mensajeCompleto = usuario + " envía: " + salida + " #" + contador;
+
+                    // Convertir el mensaje a bytes
+                    byte[] buffer = mensajeCompleto.getBytes();
+
+                    // Crear el paquete para el datagrama
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, grupo, puerto);
+
+                    // Enviar el mensaje al grupo multicast
+                    socket.send(packet);
+                    System.out.println("Enviado: " + mensajeCompleto);
+
+                    // Incrementar el contador
+                    contador++;
+                }
+            }
+
+
+            // Cerrar el socket
+            socket.close();
+            System.out.println("Conexión cerrada.");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
