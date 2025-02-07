@@ -11,18 +11,18 @@ import java.util.Scanner;
 
 public class Cliente {
     public static void main(String[] args) throws IOException {
-        InetAddress group = InetAddress.getByName("224.0.0.1");
-        int port = 4446;
+        InetAddress grupo = InetAddress.getByName("224.0.0.1");
+        int puerto = 4446;
 
         // Solicitar el nombre del usuario
         Scanner scanner = new Scanner(System.in);
         System.out.print("Introduce tu nombre de usuario: ");
         String nombreUsuario = scanner.nextLine();
-
-        // Thread to receive multicast messages
+        System.out.println("Escribe a partir de ahora tus mensajes:");
+        //iniciamos el Hilo
         new Thread(() -> {
-            try (MulticastSocket multicastSocket = new MulticastSocket(port)) {
-                multicastSocket.joinGroup(group);
+            try (MulticastSocket multicastSocket = new MulticastSocket(puerto)) {
+                multicastSocket.joinGroup(grupo);
                 byte[] buffer = new byte[1024];
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -35,7 +35,7 @@ public class Cliente {
             }
         }).start();
 
-        // Sending messages to the server
+        //Enviamos mensajes al servidor
         try (Socket socket = new Socket("localhost", 9744);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
             while (true) {
