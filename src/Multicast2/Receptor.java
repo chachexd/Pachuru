@@ -1,35 +1,41 @@
 package Multicast2;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 
 public class Receptor {
-    public static void main(String[] args) throws Exception {
-        int port = 4000;
-        String message = null;
-        InetAddress address = null;
-        MulticastSocket socket = null;
-        DatagramPacket packet = null;
+    private static final String direccion = "231.0.0.1";  // Dirección multicast
+    private static final int puerto = 12345;  // Puerto del multicast
+
+    public static void main(String[] args) {
         try {
-            address = InetAddress.getByName("224.0.0.1");
-        }
-        catch (UnknownHostException e) {
-            System.out.println("Error: " + e.toString());
-        }
-        try {
-            socket = new MulticastSocket(port);
-            socket.joinGroup(address);
-        }
-        catch(IOException e) {
-            System.out.println("Error: " + e.toString());
-        }
-        System.out.println("ServidorMulticast esperando...");
-        while (true) {
-            byte buffer[] = new byte[1024];
-            packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            message = new String(buffer, 0, packet.getLength());
-            System.out.println("Recibido: " + message);
+            //Crear un socket multicast para recibir los mensajes
+            MulticastSocket socket = new MulticastSocket(puerto);
+
+            //Dirección multicast
+            InetAddress grupo = InetAddress.getByName(direccion);
+
+            //Unirse al grupo multicast
+            socket.joinGroup(grupo);
+
+            //Buffer para almacenar los datos recibidos
+            byte[] buffer = new byte[256];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+            System.out.println("Esperando mensajes...");
+
+            //Bucle para recibir mensajes indefinidamente
+            while (true) {
+                //Recibir un paquete
+                socket.receive(packet);
+
+                //Convertir los datos recibidos en un mensaje
+                String mensaje = new String(packet.getData(), 0, packet.getLength());
+                System.out.println("Mensaje recibido: " + mensaje);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

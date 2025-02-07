@@ -1,4 +1,4 @@
-package Ejercicio4;
+package Multicast2;
 
 import java.io.*;
 import java.net.*;
