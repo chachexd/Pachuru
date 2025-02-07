@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Servidor {
+    // Servidor que recibe mensajes de los clientes y los envía a un grupo multicast
     public static void main(String[] args) {
         try (MulticastSocket multicastSocket = new MulticastSocket()) {
             InetAddress group = InetAddress.getByName("224.0.0.1");
@@ -26,7 +27,7 @@ public class Servidor {
         }
     }
 }
-
+// Clase que maneja la conexión con el cliente
 class ClientHandler implements Runnable {
     private Socket socket;
     private MulticastSocket multicastSocket;

@@ -18,8 +18,8 @@ public class Cliente {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Introduce tu nombre de usuario: ");
         String nombreUsuario = scanner.nextLine();
-
-        // Thread to receive multicast messages
+        System.out.println("Escribe a partir de ahora tus mensajes:");
+        //iniciamos el Hilo
         new Thread(() -> {
             try (MulticastSocket multicastSocket = new MulticastSocket(port)) {
                 multicastSocket.joinGroup(group);
@@ -35,7 +35,7 @@ public class Cliente {
             }
         }).start();
 
-        // Sending messages to the server
+        //Enviamos mensajes al servidor
         try (Socket socket = new Socket("localhost", 9744);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
             while (true) {
