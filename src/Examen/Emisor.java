@@ -10,7 +10,6 @@ public class Emisor {
 
     public static void main(String[] args) {
 
-
         try (MulticastSocket socket = new MulticastSocket(puerto)) {
             InetAddress grupo = InetAddress.getByName(direccion);
             socket.joinGroup(grupo);
@@ -27,7 +26,6 @@ public class Emisor {
                         socket.receive(packet);
                         String mensaje = new String(packet.getData(), 0, packet.getLength());
                         System.out.println("Mensaje recibido: " + mensaje);
-
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -39,7 +37,7 @@ public class Emisor {
             int contador = 1;
             String salida = "";
             while (!salida.equals("salir")) {
-                System.out.println("Escribe un mensaje (o 'salir' para terminar): ");
+                System.out.print("Escribe un mensaje (o 'salir' para terminar): ");
                 salida = reader.readLine();
 
                 if (!salida.equals("salir")) {
