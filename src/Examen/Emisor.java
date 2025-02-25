@@ -1,56 +1,51 @@
 package Examen;
 
-import java.io.*;
-import java.net.*;
-import java.util.UUID;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.Socket;
+import java.util.Scanner;
 
 public class Emisor {
-    private static final String direccion = "231.0.0.1";
-    private static final int puerto = 12345;
+    public static void main(String[] args) throws IOException {
+        InetAddress grupo = InetAddress.getByName("230.0.0.7");
+        int puerto = 4446;
 
-    public static void main(String[] args) {
+        // Solicitar el nombre del usuario y el mensaje
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Introduce tu nombre de usuario: ");
+        String nombreUsuario = scanner.nextLine();
+        System.out.println("Escribe un mensaje:");
 
-        try (MulticastSocket socket = new MulticastSocket(puerto)) {
-            InetAddress grupo = InetAddress.getByName(direccion);
-            socket.joinGroup(grupo);
-
-            System.out.print("Introduce tu nombre de usuario: ");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String usuario = reader.readLine();
-
-            Thread recibirMensajes = new Thread(() -> {
-                try {
-                    byte[] buffer = new byte[256];
-                    while (true) {
-                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                        socket.receive(packet);
-                        String mensaje = new String(packet.getData(), 0, packet.getLength());
-                        System.out.println("Mensaje recibido: " + mensaje);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        // Iniciar el hilo para recibir mensajes
+        new Thread(() -> {
+            try (MulticastSocket multicastSocket = new MulticastSocket(puerto)) {
+                multicastSocket.joinGroup(grupo);
+                byte[] buffer = new byte[1024];
+                while (true) {
+                    // Recibir mensajes del grupo multicast
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    multicastSocket.receive(packet);
+                    String received = new String(packet.getData(), 0, packet.getLength());
+                    System.out.println(received);
                 }
-            });
-
-            recibirMensajes.start();
-
-            int contador = 1;
-            String salida = "";
-            while (!salida.equals("salir")) {
-                System.out.print("Escribe un mensaje (o 'salir' para terminar): ");
-                salida = reader.readLine();
-
-                if (!salida.equals("salir")) {
-                    String mensajeCompleto = usuario + " envía: " + salida + " #" + contador;
-                    byte[] buffer = mensajeCompleto.getBytes();
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, grupo, puerto);
-                    socket.send(packet);
-                    System.out.println("Mensaje enviado: " + mensajeCompleto);
-                    contador++;
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }).start();
 
-            socket.leaveGroup(grupo);
+        // Enviar mensajes al servidor
+        try (Socket socket = new Socket("localhost", 9744);
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
+            while (true) {
+                // Leer el mensaje del usuario y enviarlo al servidor
+                String mensaje = scanner.nextLine();
+                bw.write(nombreUsuario + ": " + mensaje + "\n");
+                bw.flush();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

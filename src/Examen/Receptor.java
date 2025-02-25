@@ -1,26 +1,44 @@
 package Examen;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 
 public class Receptor {
-    private static final String direccion = "231.0.0.1";  // Dirección multicast
-    private static final int puerto = 12345;  // Puerto del multicast
-
+    // Crear un socket multicast y un socket servidor
     public static void main(String[] args) {
-        try (MulticastSocket socket = new MulticastSocket(puerto)) {
-            InetAddress grupo = InetAddress.getByName(direccion);
-            socket.joinGroup(grupo);
 
-            byte[] buffer = new byte[256];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            System.out.println("Esperando mensajes...");
+        // Crear un socket multicast y un socket servidor
+        try (MulticastSocket multicastSocket = new MulticastSocket(4446)) {
+            // Unirse al grupo multicast
+            InetAddress grupo = InetAddress.getByName("230.0.0.7");
+            multicastSocket.joinGroup(grupo);
+            // Crear un socket servidor
+            ServerSocket serverSocket = new ServerSocket(9744);
+            System.out.println("Servidor en ejecución...");
 
             while (true) {
-                socket.receive(packet);
-                String mensaje = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Mensaje recibido: " + mensaje);
+                // Aceptar conexiones de los clientes
+                Socket socket = serverSocket.accept();
+                new Thread(() -> handlerClient(socket, multicastSocket, grupo)).start();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void handlerClient(Socket socket, MulticastSocket multicastSocket, InetAddress grupo) {
+        // Recibir mensajes de los clientes y enviarlos al grupo multicast
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+            String mensajeCliente;
+            while ((mensajeCliente = br.readLine()) != null) {
+                // Enviar mensaje al grupo multicast
+                System.out.println("Mensaje recibido: " + mensajeCliente);
+                byte[] buffer = mensajeCliente.getBytes();
+                // Crear un paquete con el mensaje y enviarlo al grupo multicast
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, grupo, 4446);
+                multicastSocket.send(packet);
             }
         } catch (IOException e) {
             e.printStackTrace();
